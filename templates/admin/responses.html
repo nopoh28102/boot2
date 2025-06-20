@@ -1,0 +1,77 @@
+{% extends "admin/base.html" %}
+{% block title %}إدارة الردود{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>إدارة الردود المخصصة</h2>
+    <form method="POST" class="custom-form mb-4" enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-md-4 mb-2">
+                <input type="text" class="form-control" name="trigger" placeholder="الكلمة المفتاحية أو الجملة" required>
+            </div>
+            <div class="col-md-3 mb-2">
+                <select class="form-select" name="response_type" id="response_type" onchange="showResponseFields()" required>
+                    <option value="text">نص</option>
+                    <option value="media">وسائط</option>
+                </select>
+            </div>
+            <div class="col-md-5 mb-2" id="text_response_group">
+                <input type="text" class="form-control" name="response_content" placeholder="الرد النصي">
+            </div>
+            <div class="col-md-5 mb-2" id="media_response_group" style="display:none;">
+                <select class="form-select mb-2" name="media_type">
+                    <option value="image">صورة</option>
+                    <option value="audio">صوت</option>
+                    <option value="video">فيديو</option>
+                    <option value="file">ملف</option>
+                </select>
+                <input type="url" class="form-control mb-2" name="media_url" placeholder="رابط الوسائط">
+                <input type="file" class="form-control" name="media_file">
+            </div>
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-success">إضافة / تحديث الرد</button>
+            </div>
+        </div>
+    </form>
+    <div class="response-list">
+        {% for resp in responses %}
+        <div class="response-item">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>الكلمة المفتاحية:</strong> {{ resp.trigger }}<br>
+                    <strong>النوع:</strong> {{ resp.type }}
+                </div>
+                <div>
+                    <a href="{{ url_for('admin.edit_response', trigger=resp.trigger) }}" class="btn btn-sm btn-primary">تعديل</a>
+                    <a href="{{ url_for('admin.delete_response', trigger=resp.trigger) }}" class="btn btn-sm btn-danger" onclick="return confirm('هل أنت متأكد من حذف الرد؟')">حذف</a>
+                </div>
+            </div>
+            <div class="mt-2">
+                {% if resp.type == 'text' %}
+                    <span>{{ resp.content }}</span>
+                {% elif resp.type == 'media' %}
+                    {% if resp.media_type == 'image' %}
+                        <img src="{{ resp.media_url }}" style="max-width:120px;">
+                    {% elif resp.media_type == 'audio' %}
+                        <audio controls src="{{ resp.media_url }}"></audio>
+                    {% elif resp.media_type == 'video' %}
+                        <video controls src="{{ resp.media_url }}" style="max-width:120px;"></video>
+                    {% elif resp.media_type == 'file' %}
+                        <a href="{{ resp.media_url }}" target="_blank" class="btn btn-secondary btn-sm">تحميل الملف</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function showResponseFields() {
+    const type = document.getElementById('response_type').value;
+    document.getElementById('text_response_group').style.display = (type === 'text') ? 'block' : 'none';
+    document.getElementById('media_response_group').style.display = (type === 'media') ? 'block' : 'none';
+}
+showResponseFields();
+</script>
+{% endblock %}

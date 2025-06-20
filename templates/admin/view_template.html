@@ -1,0 +1,53 @@
+{% extends "admin/base.html" %}
+{% block title %}عرض القالب{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>عرض القالب: {{ template.name }}</h2>
+    <div class="template-preview mt-4">
+        <h5>النوع: {{ template.data.type }}</h5>
+        {% if template.data.type == 'text' %}
+            <p>{{ template.data.content }}</p>
+        {% elif template.data.type == 'buttons' %}
+            <p>{{ template.data.content }}</p>
+            <div class="mt-2">
+                {% for btn in template.data.buttons %}
+                    <button class="btn btn-outline-primary m-1">{{ btn.title }}</button>
+                {% endfor %}
+            </div>
+        {% elif template.data.type == 'media' %}
+            <p>{{ template.data.content }}</p>
+            {% if template.data.media_type == 'image' %}
+                <img src="{{ template.data.media_url }}" class="img-fluid" style="max-width:300px;">
+            {% elif template.data.media_type == 'audio' %}
+                <audio controls src="{{ template.data.media_url }}"></audio>
+            {% elif template.data.media_type == 'video' %}
+                <video controls src="{{ template.data.media_url }}" style="max-width:300px;"></video>
+            {% elif template.data.media_type == 'file' %}
+                <a href="{{ template.data.media_url }}" target="_blank" class="btn btn-secondary">تحميل الملف</a>
+            {% endif %}
+        {% elif template.data.type == 'generic' %}
+            <div class="row">
+                {% for element in template.data.elements %}
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        {% if element.image_url %}
+                        <img src="{{ element.image_url }}" class="card-img-top" style="max-height:150px;object-fit:cover;">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ element.title }}</h5>
+                            <p class="card-text">{{ element.subtitle }}</p>
+                            {% if element.buttons %}
+                                {% for btn in element.buttons %}
+                                    <button class="btn btn-outline-primary m-1">{{ btn.title }}</button>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary mt-3">رجوع</a>
+</div>
+{% endblock %}

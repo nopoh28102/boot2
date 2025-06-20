@@ -1,0 +1,136 @@
+{% extends "admin/base.html" %}
+
+{% block title %}التحليلات - نظام بوت الدردشة{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">تحليلات النظام</h2>
+    </div>
+    
+    <!-- Cards for Quick Stats -->
+    <div class="col-md-3">
+        <div class="stats-card">
+            <h4>المستخدمين النشطين</h4>
+            <h2 class="text-primary">{{ stats.active_users }}</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <h4>الرسائل اليوم</h4>
+            <h2 class="text-success">{{ stats.messages_today }}</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <h4>معدل الرضا</h4>
+            <h2 class="text-info">{{ stats.satisfaction_rate }}%</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <h4>الردود المتعلمة</h4>
+            <h2 class="text-warning">{{ stats.learned_responses }}</h2>
+        </div>
+    </div>
+    
+    <!-- Interaction Chart -->
+    <div class="col-md-8">
+        <div class="analytics-chart">
+            <canvas id="interactionsChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Response Types -->
+    <div class="col-md-4">
+        <div class="analytics-chart">
+            <canvas id="responseTypesChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Popular Topics -->
+    <div class="col-md-6">
+        <div class="template-editor">
+            <h4>المواضيع الأكثر شيوعاً</h4>
+            <div class="response-list">
+                {% for topic in popular_topics %}
+                <div class="response-item">
+                    <strong>{{ topic.name }}</strong>
+                    <span class="badge bg-primary float-start">{{ topic.count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- User Feedback -->
+    <div class="col-md-6">
+        <div class="template-editor">
+            <h4>تقييمات المستخدمين</h4>
+            <div class="response-list">
+                {% for feedback in recent_feedback %}
+                <div class="response-item">
+                    <p>{{ feedback.message }}</p>
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">{{ feedback.timestamp }}</small>
+                        <span class="badge {% if feedback.score > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                            {{ feedback.score }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Interactions Chart
+const interactionsCtx = document.getElementById('interactionsChart').getContext('2d');
+new Chart(interactionsCtx, {
+    type: 'line',
+    data: {
+        labels: {{ chart_data.labels | tojson }},
+        datasets: [{
+            label: 'التفاعلات',
+            data: {{ chart_data.interactions | tojson }},
+            borderColor: '#007bff',
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'التفاعلات على مدار الوقت'
+            }
+        }
+    }
+});
+
+// Response Types Chart
+const responseTypesCtx = document.getElementById('responseTypesChart').getContext('2d');
+new Chart(responseTypesCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['ردود AI', 'ردود متعلمة', 'قوالب', 'ردود مخصصة'],
+        datasets: [{
+            data: {{ chart_data.response_types | tojson }},
+            backgroundColor: ['#007bff', '#28a745', '#ffc107', '#17a2b8']
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'أنواع الردود'
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
